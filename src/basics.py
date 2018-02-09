@@ -15,7 +15,7 @@ with graph.as_default():
 print(graph.get_operations())
 
 # Evaluate the graph in a session
-with tf.Session(graph=graph):
+with tf.Session(graph = graph):
     result = output.eval()
     print("result: ", result)
 
@@ -40,8 +40,24 @@ with matmul_graph.as_default():
     # Matrix multiply (matmul) the two tensors
     output = tf.matmul(matrix, vector)
 
-with tf.Session(graph=matmul_graph):
+with tf.Session(graph = matmul_graph):
     result = output.eval()
     print(result)
 
 
+
+# Evaluate repeated matrix-vector multiplications
+var_graph = tf.Graph()
+with var_graph.as_default():
+    # Declare a  constant 2x2 matrix and a variable 2x1 vector
+    matrix = tf.constant([[1.0, 1.0], [1.0, 1.0]])
+    vector = tf.Variable([[1.0], [1.0]])
+    # Multiply the matrix and vector 4 times
+    for _ in range(4):
+        vector = tf.matmul(matrix, vector)
+
+with tf.Session(graph = var_graph):
+    # Initialize the variables we defined above.
+    tf.global_variables_initializer().run()
+    result = vector.eval()
+    print(result)

@@ -8,7 +8,7 @@ import tensorflow as tf
 # Draw plots inline in the notebook
 %matplotlib inline
 
-# Set up sample points perturbed away from the ideal linear relationship 
+# Set up sample points perturbed away from the ideal linear relationship
 # y = 0.5*x + 2.5
 num_examples = 60
 points = np.array([np.linspace(-1, 5, num_examples),

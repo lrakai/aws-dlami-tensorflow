@@ -8,7 +8,19 @@ import tensorflow as tf
 # Draw plots inline in the notebook
 %matplotlib inline
 
-# Set up sample points perturbed away from the ideal linear relationship
+def variable_summaries(var):
+    """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
+    with tf.name_scope('summaries'):
+        mean = tf.reduce_mean(var)
+        tf.summary.scalar('mean', mean)
+        with tf.name_scope('stddev'):
+            stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
+        tf.summary.scalar('stddev', stddev)
+        tf.summary.scalar('max', tf.reduce_max(var))
+        tf.summary.scalar('min', tf.reduce_min(var))
+        tf.summary.histogram('histogram', var)
+
+# Set up sample points perturbed away from the ideal linear relationship 
 # y = 0.5*x + 2.5
 num_examples = 60
 points = np.array([np.linspace(-1, 5, num_examples),
@@ -23,7 +35,7 @@ training_steps = 100
 learning_rate = 0.001
 losses = []
 
-with tf.Session():
+with tf.Session() as sess:
     # Set up all the tensors, variables, and operations.
     input = tf.constant(x_with_bias)
     target = tf.constant(np.transpose([y]).astype(np.float32))
@@ -31,6 +43,8 @@ with tf.Session():
     weights = tf.Variable(tf.random_normal([2, 1], 0, 0.1))
 
     tf.global_variables_initializer().run()
+    
+    summary_writer = tf.summary.FileWriter('/tmp/tensorflow/nn', graph=tf.get_default_graph())
 
     # Calculate the current prediction error
     y_predicted = tf.matmul(input, weights)
@@ -38,14 +52,21 @@ with tf.Session():
 
     # Compute the L2 loss function of the error
     loss = tf.nn.l2_loss(y_error)
+    
+    tf.summary.histogram('y_error', y_error)
+    tf.summary.scalar('loss', loss)
 
+    merged = tf.summary.merge_all()
+    tf.global_variables_initializer().run()
+ 
     # Train the network using an optimizer that minimizes the loss function
     update_weights = tf.train.GradientDescentOptimizer(
         learning_rate).minimize(loss)
 
-    for _ in range(training_steps):
+    for i in range(training_steps):
         # Repeatedly run the operations, updating the TensorFlow variable.
-        update_weights.run()
+        summary, acc = sess.run([merged, update_weights])
+        summary_writer.add_summary(summary, i)
         losses.append(loss.eval())
 
     # Training is done, get the final values for the graphs

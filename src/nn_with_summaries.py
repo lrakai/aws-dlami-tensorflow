@@ -8,24 +8,25 @@ import tensorflow as tf
 # Draw plots inline in the notebook
 %matplotlib inline
 
-log_dir = '/tmp/tensorflow/nn'
+# Start with a clean environment each run
+log_dir = '/tmp/tensorflow/nn/train'  # TensorBoard logs saved here
 if tf.gfile.Exists(log_dir):
     tf.gfile.DeleteRecursively(log_dir)
 tf.gfile.MakeDirs(log_dir)
 tf.reset_default_graph()
 
 
-def variable_summaries(var):
+def variable_summaries(name, var):
     """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
-    with tf.name_scope('summaries'):
-        mean = tf.reduce_mean(var)
-        tf.summary.scalar('mean', mean)
-        with tf.name_scope('stddev'):
+    with tf.name_scope('weights'):
+        with tf.name_scope('summaries'):
+            mean = tf.reduce_mean(var)
+            tf.summary.scalar('mean', mean)
             stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
-        tf.summary.scalar('stddev', stddev)
-        tf.summary.scalar('max', tf.reduce_max(var))
-        tf.summary.scalar('min', tf.reduce_min(var))
-        tf.summary.histogram('histogram', var)
+            tf.summary.scalar('stddev', stddev)
+            tf.summary.scalar('max', tf.reduce_max(var))
+            tf.summary.scalar('min', tf.reduce_min(var))
+            tf.summary.histogram('histogram', var)
 
 
 # Set up sample points perturbed away from the ideal linear relationship
@@ -52,9 +53,6 @@ with tf.Session() as sess:
 
     tf.global_variables_initializer().run()
 
-    summary_writer = tf.summary.FileWriter(
-        log_dir, graph=tf.get_default_graph())
-
     # Calculate the current prediction error
     y_predicted = tf.matmul(input, weights)
     y_error = tf.subtract(y_predicted, target)
@@ -62,21 +60,23 @@ with tf.Session() as sess:
     # Compute the L2 loss function of the error
     loss = tf.nn.l2_loss(y_error)
 
-    tf.summary.histogram('y_error', y_error)
-    tf.summary.scalar('loss', loss)
-
-    merged = tf.summary.merge_all()
     tf.global_variables_initializer().run()
 
     # Train the network using an optimizer that minimizes the loss function
     update_weights = tf.train.GradientDescentOptimizer(
         learning_rate).minimize(loss)
 
+    variable_summaries('weights', weights)
+    tf.summary.histogram('y_error', y_error)
+    tf.summary.scalar('loss', loss)
+    merged = tf.summary.merge_all()
+    summary_writer = tf.summary.FileWriter(
+        log_dir, graph=tf.get_default_graph())
+
     for i in range(training_steps):
-        # Repeatedly run the operations, updating the TensorFlow variable.
+        # Repeatedly run the summary and training operations
         summary, acc = sess.run([merged, update_weights])
         summary_writer.add_summary(summary, i)
-        losses.append(loss.eval())
 
     summary_writer.close()
 

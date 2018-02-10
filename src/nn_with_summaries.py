@@ -1,4 +1,4 @@
-'''Single neuron neural network'''
+'''Single neuron neural network with TensorBoard annotations'''
 
 from __future__ import print_function
 import numpy as np
@@ -7,6 +7,12 @@ import tensorflow as tf
 
 # Draw plots inline in the notebook
 %matplotlib inline
+
+log_dir = '/tmp/tensorflow/nn'
+if tf.gfile.Exists(log_dir):
+    tf.gfile.DeleteRecursively(log_dir)
+tf.gfile.MakeDirs(log_dir)
+tf.reset_default_graph()
 
 def variable_summaries(var):
     """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
@@ -44,7 +50,7 @@ with tf.Session() as sess:
 
     tf.global_variables_initializer().run()
     
-    summary_writer = tf.summary.FileWriter('/tmp/tensorflow/nn', graph=tf.get_default_graph())
+    summary_writer = tf.summary.FileWriter(log_dir, graph=tf.get_default_graph())
 
     # Calculate the current prediction error
     y_predicted = tf.matmul(input, weights)
@@ -69,29 +75,5 @@ with tf.Session() as sess:
         summary_writer.add_summary(summary, i)
         losses.append(loss.eval())
 
-    # Training is done, get the final values for the graphs
-    w = weights.eval()
-    y_predicted = y_predicted.eval()
+    summary_writer.close()
 
-# Show the fit and the loss over time.
-fig, (ax1, ax2) = plt.subplots(1, 2)
-plt.subplots_adjust(wspace=.3)
-fig.set_size_inches(11, 4)
-# Plot the perturbed points in blue dots
-ax1.scatter(x, y, c="b", alpha=.6)
-# Plot the predicted values in green dots
-ax1.scatter(x, np.transpose(y_predicted)[0], c="g", alpha=0.6)
-
-line_x_range = (-3, 7)
-# Plot the predicted line in green
-ax1.plot(line_x_range, [w[1] * x + w[0]
-                        for x in line_x_range], "g", alpha=0.6)
-# Plot the noise-free line (0.5*x + 2.5) in red
-ax1.plot(line_x_range, [0.5 * x + 2.5
-                        for x in line_x_range], "r", alpha=0.6)
-ax1.set_xlabel("x")
-ax1.set_ylabel("y")
-ax2.plot(range(0, training_steps), losses)
-ax2.set_xlabel("Training step")
-ax2.set_ylabel("Loss")
-plt.show()

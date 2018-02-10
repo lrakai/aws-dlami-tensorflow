@@ -14,6 +14,7 @@ if tf.gfile.Exists(log_dir):
 tf.gfile.MakeDirs(log_dir)
 tf.reset_default_graph()
 
+
 def variable_summaries(var):
     """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
     with tf.name_scope('summaries'):
@@ -26,7 +27,8 @@ def variable_summaries(var):
         tf.summary.scalar('min', tf.reduce_min(var))
         tf.summary.histogram('histogram', var)
 
-# Set up sample points perturbed away from the ideal linear relationship 
+
+# Set up sample points perturbed away from the ideal linear relationship
 # y = 0.5*x + 2.5
 num_examples = 60
 points = np.array([np.linspace(-1, 5, num_examples),
@@ -49,8 +51,9 @@ with tf.Session() as sess:
     weights = tf.Variable(tf.random_normal([2, 1], 0, 0.1))
 
     tf.global_variables_initializer().run()
-    
-    summary_writer = tf.summary.FileWriter(log_dir, graph=tf.get_default_graph())
+
+    summary_writer = tf.summary.FileWriter(
+        log_dir, graph=tf.get_default_graph())
 
     # Calculate the current prediction error
     y_predicted = tf.matmul(input, weights)
@@ -58,13 +61,13 @@ with tf.Session() as sess:
 
     # Compute the L2 loss function of the error
     loss = tf.nn.l2_loss(y_error)
-    
+
     tf.summary.histogram('y_error', y_error)
     tf.summary.scalar('loss', loss)
 
     merged = tf.summary.merge_all()
     tf.global_variables_initializer().run()
- 
+
     # Train the network using an optimizer that minimizes the loss function
     update_weights = tf.train.GradientDescentOptimizer(
         learning_rate).minimize(loss)
@@ -77,3 +80,4 @@ with tf.Session() as sess:
 
     summary_writer.close()
 
+print('Complete')

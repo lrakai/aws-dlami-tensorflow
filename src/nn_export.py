@@ -40,7 +40,7 @@ with tf.Session() as sess:
     train_y_error = tf.subtract(train_y_predicted, target)
 
     # Define prediction operation
-    y = tf.matmul(x, weights)
+    y = tf.matmul(x, weights[:-1]) + weights[-1]
 
     # Compute the L2 loss function of the error
     loss = tf.nn.l2_loss(train_y_error)

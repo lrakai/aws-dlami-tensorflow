@@ -12,7 +12,7 @@ def do_prediction(hostport):
     Args:
     hostport: Host:port address of the Prediction Service.
     Returns:
-    pred values, ground truth label
+    predicted value, noise-free value
     """
     # create connection
     host, port = hostport.split(':')

@@ -60,12 +60,11 @@ with tf.Session() as sess:
     # Compute the L2 loss function of the error
     loss = tf.nn.l2_loss(y_error)
 
-    tf.global_variables_initializer().run()
-
     # Train the network using an optimizer that minimizes the loss function
     update_weights = tf.train.GradientDescentOptimizer(
         learning_rate).minimize(loss)
 
+    # Add summary operations
     variable_summaries('weights', weights)
     tf.summary.histogram('y_error', y_error)
     tf.summary.scalar('loss', loss)

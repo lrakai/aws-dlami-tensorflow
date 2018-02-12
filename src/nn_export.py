@@ -22,7 +22,6 @@ train_x_with_bias = np.array([(1., d) for d in train_x]).astype(np.float32)
 # Training parameters
 training_steps = 100
 learning_rate = 0.001
-losses = []
 
 with tf.Session() as sess:
     # Set up all the tensors, variables, and operations.
@@ -40,7 +39,7 @@ with tf.Session() as sess:
     train_y_error = tf.subtract(train_y_predicted, target)
 
     # Define prediction operation
-    y = tf.matmul(x, weights[:-1]) + weights[-1]
+    y = tf.matmul(x, weights[1:]) + weights[0]
 
     # Compute the L2 loss function of the error
     loss = tf.nn.l2_loss(train_y_error)

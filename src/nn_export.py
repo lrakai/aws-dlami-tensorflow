@@ -54,30 +54,36 @@ with tf.Session() as sess:
 
     ## Export the Model
 
+    # Create a SavedModelBuilder
     export_path_base = FLAGS.export_dir
     export_path = os.path.join(export_path_base, str(FLAGS.model_version))
     print('Exporting trained model to', export_path)
     builder = tf.saved_model.builder.SavedModelBuilder(export_path)
 
+    # Build signature inputs and outputs
     tensor_info_input = tf.saved_model.utils.build_tensor_info(x)
     tensor_info_output = tf.saved_model.utils.build_tensor_info(y)
 
+    # Create the prediction signature
     prediction_signature = (
-        tf.saved_model.signature_def_utils.build_signature_def(
-            inputs={'input': tensor_info_input},
-            outputs={'output': tensor_info_output},
-            method_name=tf.saved_model.signature_constants.PREDICT_METHOD_NAME))
+    tf.saved_model.signature_def_utils.build_signature_def(
+    inputs={'input': tensor_info_input},
+    outputs={'output': tensor_info_output},
+    method_name=tf.saved_model.signature_constants.PREDICT_METHOD_NAME))
 
+    # Provide legacy initialization op for compatibility with older version of tf
     legacy_init_op = tf.group(tf.tables_initializer(), name='legacy_init_op')
 
+    # Build the model
     builder.add_meta_graph_and_variables(
-        sess, [tf.saved_model.tag_constants.SERVING],
-        signature_def_map={
-            'prediction':
-            prediction_signature,
-        },
-        legacy_init_op=legacy_init_op)
+    sess, [tf.saved_model.tag_constants.SERVING],
+    signature_def_map={
+    'prediction':
+    prediction_signature,
+    },
+    legacy_init_op=legacy_init_op)
 
+    # Save the model
     builder.save()
 
 print('Complete')

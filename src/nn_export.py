@@ -48,7 +48,7 @@ with tf.Session() as sess:
         # Repeatedly run the operations, updating the TensorFlow variable.
         update_weights.run()
 
-    ## Export the Model
+    # Export the Model
 
     export_path_base = FLAGS.export_dir
     export_path = os.path.join(export_path_base, str(FLAGS.model_version))
@@ -76,4 +76,4 @@ with tf.Session() as sess:
 
     builder.save()
 
-    print('Done exporting!')
+print('Complete')
